@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>shrink-it</title>
+<style>
+  :root { --bg:#f6f7f9; --card:#fff; --fg:#14171c; --muted:#5d6672; --line:#e3e6ea; --accent:#2f5bea; --bad:#b42318; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#0f1115; --card:#171a20; --fg:#e8eaee; --muted:#9aa3ae; --line:#2a2f37; --accent:#7b9cff; --bad:#ff6b5e; } }
+  * { box-sizing:border-box }
+  body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif; padding:16px }
+  main { max-width:640px; margin:40px auto }
+  h1 { margin:0 } p { color:var(--muted) }
+  form, pre { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:20px }
+  label { display:block; font-weight:600; margin:12px 0 4px; font-size:.9rem }
+  input, textarea { width:100%; padding:10px; border-radius:8px; border:1px solid var(--line); background:var(--bg); color:var(--fg); font:inherit }
+  textarea { font-family:ui-monospace,monospace; font-size:.85rem; min-height:140px }
+  button { margin-top:16px; padding:10px 18px; border:0; border-radius:8px; background:var(--accent); color:#fff; font-weight:600; cursor:pointer }
+  pre { white-space:pre-wrap; word-break:break-all; font-size:.85rem; margin-top:16px }
+</style>
+</head>
+<body>
+<main>
+  <h1>shrink-it</h1>
+  <p>Smart, self-hosted short links with safety scanning and dead-link fallback.</p>
+  <form id="f">
+    <label for="url">Destination URL</label>
+    <input id="url" required placeholder="https://example.com/landing">
+    <label for="code">Custom code (optional)</label>
+    <input id="code" placeholder="launch-2026">
+    <label for="fallback">Fallback URL if destination goes down (optional)</label>
+    <input id="fallback" placeholder="https://example.com">
+    <label for="rules">Rules JSON (optional)</label>
+    <textarea id="rules" spellcheck="false">{
+  "rules": [
+    {"name": "ios", "when": {"devices": ["ios"]}, "target": "https://apps.apple.com"},
+    {"name": "android", "when": {"devices": ["android"]}, "target": "https://play.google.com"}
+  ]
+}</textarea>
+    {{if .AuthRequired}}<label for="token">Admin token</label><input id="token" type="password">{{end}}
+    <button>Shorten</button>
+  </form>
+  <pre id="out" hidden></pre>
+</main>
+<script>
+document.getElementById('f').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const out = document.getElementById('out');
+  const v = (id) => (document.getElementById(id)?.value || '').trim();
+  let rules = {};
+  try { if (v('rules')) rules = JSON.parse(v('rules')); } catch { out.hidden = false; out.textContent = 'Rules JSON is not valid.'; return; }
+  const body = { url: v('url'), rules };
+  if (v('code')) body.code = v('code');
+  if (v('fallback')) body.fallback_url = v('fallback');
+  const headers = { 'Content-Type': 'application/json' };
+  if (v('token')) headers.Authorization = 'Bearer ' + v('token');
+  const res = await fetch('/api/links', { method: 'POST', headers, body: JSON.stringify(body) });
+  out.hidden = false;
+  out.textContent = JSON.stringify(await res.json(), null, 2);
+});
+</script>
+</body>
+</html>

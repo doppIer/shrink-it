@@ -1,0 +1,5 @@
+.env
+/bin/
+/shrink-it
+*.out
+coverage.*

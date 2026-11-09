@@ -1,0 +1,4 @@
+# One domain per line; subdomains are blocked too. Hosts-file format works.
+# Replace or extend with a real feed, e.g. https://urlhaus.abuse.ch/downloads/hostfile/
+malware.testing.google.test
+phishing.example

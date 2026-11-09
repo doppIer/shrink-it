@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>{{if eq .State "blocked"}}Warning: unsafe link{{else if eq .State "notfound"}}Link not found{{else if eq .State "gone"}}Link expired{{else}}Link preview{{end}} · shrink-it</title>
+<style>
+  :root { --bg:#f6f7f9; --card:#fff; --fg:#14171c; --muted:#5d6672; --line:#e3e6ea; --ok:#127a46; --warn:#9a5b00; --bad:#b42318; --accent:#2f5bea; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#0f1115; --card:#171a20; --fg:#e8eaee; --muted:#9aa3ae; --line:#2a2f37; --ok:#4cc38a; --warn:#f0b44c; --bad:#ff6b5e; --accent:#7b9cff; } }
+  * { box-sizing:border-box }
+  body { margin:0; min-height:100vh; display:grid; place-items:center; padding:16px; background:var(--bg); color:var(--fg); font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif }
+  .card { width:100%; max-width:560px; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:28px }
+  h1 { font-size:1.35rem; margin:0 0 8px }
+  .badge { display:inline-block; font-size:.8rem; font-weight:600; padding:2px 10px; border-radius:999px; border:1px solid currentColor; margin-right:6px }
+  .ok { color:var(--ok) } .warn { color:var(--warn) } .bad { color:var(--bad) }
+  .target { word-break:break-all; background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:10px 12px; font-family:ui-monospace,monospace; font-size:.9rem; margin:16px 0 }
+  ul { padding-left:20px; color:var(--muted) }
+  .muted { color:var(--muted); font-size:.9rem }
+  a.btn { display:inline-block; margin-top:12px; padding:10px 18px; border-radius:8px; background:var(--accent); color:#fff; text-decoration:none; font-weight:600 }
+  a.btn.secondary { background:transparent; color:var(--fg); border:1px solid var(--line) }
+</style>
+</head>
+<body>
+<main class="card">
+{{if eq .State "notfound"}}
+  <h1>Link not found</h1>
+  <p class="muted">This short link doesn't exist or was deleted.</p>
+{{else if eq .State "gone"}}
+  <h1>This link has expired</h1>
+  <p class="muted">The owner set this link to stop working.</p>
+{{else if eq .State "blocked"}}
+  <h1 class="bad">Warning: this link was blocked</h1>
+  <p>shrink-it stopped this redirect because the destination was flagged as unsafe.</p>
+  <div class="target">{{.Link.TargetURL}}</div>
+  {{with .Link.SafetyReason}}<p><span class="badge bad">reason</span>{{.}}</p>{{end}}
+  <p class="muted">If you trust this site, copy the address manually. We won't link to it.</p>
+{{else}}
+  <h1>Where does this link go?</h1>
+  <div>
+    {{if eq .Link.SafetyStatus "safe"}}<span class="badge ok">safety: passed</span>{{else}}<span class="badge warn">safety: {{.Link.SafetyStatus}}</span>{{end}}
+    {{if eq .Link.HealthStatus "healthy"}}<span class="badge ok">target online</span>{{else if eq .Link.HealthStatus "broken"}}<span class="badge bad">target down</span>{{else}}<span class="badge warn">not checked yet</span>{{end}}
+  </div>
+  <div class="target">{{.Link.TargetURL}}</div>
+  {{if .Link.SafetyWarnings}}<p class="warn"><strong>Things to know</strong></p><ul>{{range .Link.SafetyWarnings}}<li>{{.}}</li>{{end}}</ul>{{end}}
+  {{if or .Link.Rules.Rules .Link.Rules.Variants}}<p class="muted">This is a smart link: you may be sent to a different page depending on your device, location or time.</p>{{end}}
+  {{if and (eq .Link.HealthStatus "broken") .Link.FallbackURL}}<p class="muted">The main destination is down, so you'll be sent to the backup: <code>{{.Link.FallbackURL}}</code></p>{{end}}
+  <a class="btn" href="/{{.Link.Code}}" rel="noopener noreferrer">Continue</a>
+{{end}}
+</main>
+</body>
+</html>
