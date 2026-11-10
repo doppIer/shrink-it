@@ -1,4 +1,14 @@
-# shrink-it
+<p align="center">
+  <img src="docs/logo.png" alt="shrink-it logo" width="128" height="128">
+</p>
+
+<h1 align="center">shrink-it</h1>
+
+<p align="center">
+  <a href="https://github.com/doppIer/shrink-it/actions/workflows/ci.yml"><img src="https://github.com/doppIer/shrink-it/actions/workflows/ci.yml/badge.svg" alt="ci"></a>
+  <a href="https://github.com/doppIer/shrink-it/actions/workflows/release.yml"><img src="https://github.com/doppIer/shrink-it/actions/workflows/release.yml/badge.svg" alt="release"></a>
+  <a href="https://github.com/doppIer/shrink-it/pkgs/container/shrink-it"><img src="https://img.shields.io/badge/ghcr.io-doppier%2Fshrink--it-blue?logo=docker" alt="image"></a>
+</p>
 
 A self-hosted URL shortener that **routes each visitor to the right place** and **refuses to send anyone somewhere dangerous or dead**.
 
@@ -7,9 +17,34 @@ Most open-source shorteners (YOURLS, Shlink, Kutt) map one code to one URL. shri
 - **Smart routing.** One short link, many destinations: by device (iOS / Android / desktop), country, browser language, weekday and time window, plus sticky weighted A/B splits.
 - **Link guarding.** Every destination is scanned before the link is created and re-scanned in the background. Targets are probed for health, and when one goes down the link quietly switches to a fallback URL. A link that becomes malicious later gets a warning page instead of a redirect.
 
-Written in Go with PostgreSQL and Redis. `docker compose up` and it runs.
+Written in Go with PostgreSQL and Redis. One command and it runs.
 
-## Quick start
+## Install
+
+You only need Docker. No clone and no build: this pulls the published image (amd64 and arm64, so it also runs on Apple Silicon and Raspberry Pi).
+
+```bash
+curl -fsSLO https://raw.githubusercontent.com/doppIer/shrink-it/main/deploy/docker-compose.yml
+ADMIN_TOKEN=$(openssl rand -hex 24) docker compose up -d
+```
+
+Open http://localhost:8080. Keep the token: the API needs it as `Authorization: Bearer <token>`. To keep settings, put them in a `.env` file next to the compose file (`ADMIN_TOKEN`, `BASE_URL`, `PORT`, `POSTGRES_PASSWORD`, `SAFE_BROWSING_API_KEY`, ...).
+
+Pin a version with `SHRINKIT_VERSION=0.1.0`, and upgrade with:
+
+```bash
+docker compose pull && docker compose up -d
+```
+
+Image tags on `ghcr.io/doppier/shrink-it`:
+
+| Tag | Contains |
+| --- | --- |
+| `latest` | newest release |
+| `0.1.0`, `0.1` | a specific release |
+| `edge` | current `main` branch |
+
+## Quick start from source
 
 ```bash
 cp .env.example .env          # set ADMIN_TOKEN
@@ -135,6 +170,12 @@ make test   # go test -race ./...
 make lint   # go vet + gofmt
 make up     # docker compose up --build
 make logs
+```
+
+**Releasing:** push a version tag and the `release` workflow publishes the image.
+
+```bash
+git tag v0.1.0 && git push origin v0.1.0
 ```
 
 ```

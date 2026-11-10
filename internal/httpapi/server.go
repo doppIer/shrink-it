@@ -24,6 +24,9 @@ import (
 //go:embed templates/*.html
 var templatesFS embed.FS
 
+//go:embed static/favicon.png
+var faviconPNG []byte
+
 var tmpl = template.Must(template.ParseFS(templatesFS, "templates/*.html"))
 
 type Store interface {
@@ -67,6 +70,8 @@ func (s *Server) Handler() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /{$}", s.handleIndex)
 	mux.HandleFunc("GET /healthz", s.handleHealthz)
+	mux.HandleFunc("GET /favicon.png", handleFavicon)
+	mux.HandleFunc("GET /favicon.ico", handleFavicon)
 	mux.HandleFunc("POST /api/links", s.auth(s.handleCreate))
 	mux.HandleFunc("GET /api/links", s.auth(s.handleList))
 	mux.HandleFunc("GET /api/links/{code}", s.auth(s.handleGet))
@@ -112,6 +117,12 @@ func (s *Server) logRequests(next http.Handler) http.Handler {
 func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	_ = tmpl.ExecuteTemplate(w, "index.html", map[string]any{"BaseURL": s.BaseURL, "AuthRequired": s.AdminToken != ""})
+}
+
+func handleFavicon(w http.ResponseWriter, _ *http.Request) {
+	w.Header().Set("Content-Type", "image/png")
+	w.Header().Set("Cache-Control", "public, max-age=86400")
+	_, _ = w.Write(faviconPNG)
 }
 
 func (s *Server) handleHealthz(w http.ResponseWriter, r *http.Request) {

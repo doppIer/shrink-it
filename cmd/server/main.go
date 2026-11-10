@@ -20,6 +20,9 @@ import (
 	"github.com/doppIer/shrink-it/internal/store"
 )
 
+// version is set at build time with -ldflags "-X main.version=...".
+var version = "dev"
+
 func main() {
 	log := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}))
 	if err := run(log); err != nil {
@@ -73,7 +76,7 @@ func run(log *slog.Logger) error {
 
 	errCh := make(chan error, 1)
 	go func() {
-		log.Info("listening", "addr", cfg.Addr, "base_url", cfg.BaseURL)
+		log.Info("listening", "addr", cfg.Addr, "base_url", cfg.BaseURL, "version", version)
 		errCh <- srv.ListenAndServe()
 	}()
 
