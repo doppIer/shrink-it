@@ -1,8 +1,14 @@
-# shrink-it
+<p align="center">
+  <img src="docs/logo.png" alt="shrink-it logo" width="128" height="128">
+</p>
 
-[![ci](https://github.com/doppIer/shrink-it/actions/workflows/ci.yml/badge.svg)](https://github.com/doppIer/shrink-it/actions/workflows/ci.yml)
-[![release](https://github.com/doppIer/shrink-it/actions/workflows/release.yml/badge.svg)](https://github.com/doppIer/shrink-it/actions/workflows/release.yml)
-[![image](https://img.shields.io/badge/ghcr.io-doppier%2Fshrink--it-blue?logo=docker)](https://github.com/doppIer/shrink-it/pkgs/container/shrink-it)
+<h1 align="center">shrink-it</h1>
+
+<p align="center">
+  <a href="https://github.com/doppIer/shrink-it/actions/workflows/ci.yml"><img src="https://github.com/doppIer/shrink-it/actions/workflows/ci.yml/badge.svg" alt="ci"></a>
+  <a href="https://github.com/doppIer/shrink-it/actions/workflows/release.yml"><img src="https://github.com/doppIer/shrink-it/actions/workflows/release.yml/badge.svg" alt="release"></a>
+  <a href="https://github.com/doppIer/shrink-it/pkgs/container/shrink-it"><img src="https://img.shields.io/badge/ghcr.io-doppier%2Fshrink--it-blue?logo=docker" alt="image"></a>
+</p>
 
 A self-hosted URL shortener that **routes each visitor to the right place** and **refuses to send anyone somewhere dangerous or dead**.
 

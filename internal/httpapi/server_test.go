@@ -209,3 +209,11 @@ func TestVisitorParsing(t *testing.T) {
 		t.Fatal("country header not read")
 	}
 }
+
+func TestFavicon(t *testing.T) {
+	s, _, _ := newTestServer()
+	w := do(s.Handler(), "GET", "/favicon.png", "", nil)
+	if w.Code != 200 || w.Header().Get("Content-Type") != "image/png" || w.Body.Len() < 100 {
+		t.Fatalf("favicon: %d %s %d bytes", w.Code, w.Header().Get("Content-Type"), w.Body.Len())
+	}
+}
