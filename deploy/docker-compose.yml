@@ -1,0 +1,57 @@
+# shrink-it: run from the published image, no clone or build needed.
+#
+#   curl -fsSLO https://raw.githubusercontent.com/doppIer/shrink-it/main/deploy/docker-compose.yml
+#   ADMIN_TOKEN=$(openssl rand -hex 24) docker compose up -d
+#
+# Settings can also go in a .env file next to this one (see .env.example in the repo).
+
+name: shrink-it
+
+services:
+  app:
+    image: ghcr.io/doppier/shrink-it:${SHRINKIT_VERSION:-latest}
+    ports:
+      - "${PORT:-8080}:8080"
+    environment:
+      ADMIN_TOKEN: ${ADMIN_TOKEN:?set ADMIN_TOKEN to protect the API}
+      BASE_URL: ${BASE_URL:-http://localhost:8080}
+      DATABASE_URL: postgres://shrinkit:${POSTGRES_PASSWORD:-shrinkit}@postgres:5432/shrinkit?sslmode=disable
+      REDIS_URL: redis://redis:6379/0
+      SAFE_BROWSING_API_KEY: ${SAFE_BROWSING_API_KEY:-}
+      HEALTH_INTERVAL: ${HEALTH_INTERVAL:-15m}
+      HEALTH_FAIL_THRESHOLD: ${HEALTH_FAIL_THRESHOLD:-3}
+      TRUST_PROXY: ${TRUST_PROXY:-false}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: shrinkit
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-shrinkit}
+      POSTGRES_DB: shrinkit
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U shrinkit"]
+      interval: 2s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 2s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+volumes:
+  pgdata:
